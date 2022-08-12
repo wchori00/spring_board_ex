@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xsi:schemaLocation="http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-4.3.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.3.xsd
+		http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.3.xsd
+		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.3.xsd">
+
+	<context:component-scan base-package="tommy.spring.web">
+	</context:component-scan>
+
+	<mvc:annotation-driven></mvc:annotation-driven>
+	<tx:annotation-driven transaction-manager="txManager"/>
+	<!-- Transaction 설정 -->	
+	
+	<tx:advice id="txAdvice" transaction-manager="txManager">
+		<tx:attributes>
+			<tx:method name="get*" read-only="true" />
+			<tx:method name="*" />
+		</tx:attributes>
+	</tx:advice>
+	
+	<aop:config>
+		<aop:pointcut expression="execution(* tommy.spring.web..*Impl.*(..))" id="txPointcut"/>
+		<aop:advisor advice-ref="txAdvice" pointcut-ref="txPointcut"/>
+	</aop:config>
+
+<!-- 파일 업로드 설정 -->
+<bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+<property name="maxUploadSize" value="10000000" />
+</bean>
+
+<!-- 예외처리 설정 -->
+<bean id="exceptionResolver" class="org.springframework.web.servlet.handler.SimpleMappingExceptionResolver">
+<property name="exceptionMappings">
+<props>
+<prop key="java.lang.ArithmeticException">common/arithmeticError.jsp</prop>
+<prop key="java.lang.NullPointerException">common/nullPointerError.jsp</prop>
+</props>
+</property>
+<property name="defaultErrorView" value="common/error.jsp"/>
+</bean>
+
+<!-- 다국어 설정: MessageSource 등록 -->
+<bean id="messageSource" class="org.springframework.context.support.ResourceBundleMessageSource">
+<property name="basenames">
+<list>
+<value>message.messageSource</value>
+</list>
+</property>
+</bean>
+<!-- LocaleResolver 등록 -->
+<bean id="localeResolver" class="org.springframework.web.servlet.i18n.SessionLocaleResolver"></bean>
+<!-- LocaleChangeInterceptor 등록 -->
+<mvc:interceptors>
+	<bean class="org.springframework.web.servlet.i18n.LocaleChangeInterceptor">
+		<property name="paramName" value="lang"/>
+	</bean>
+</mvc:interceptors>
+<!-- 
+	<bean class="org.springframework.web.servlet.handler.SimpleUrlHandlerMapping">
+		<property name="mappings">
+			<props>
+				<prop key="/login.do">login</prop>
+				<prop key="/getBoardList.do">getBoardList</prop>
+				<prop key="/getBoard.do">getBoard</prop>
+	            <prop key="/insertBoard.do">insertBoard</prop>
+	            <prop key="/updateBoard.do">updateBoard</prop>
+	            <prop key="/deleteBoard.do">deleteBoard</prop>
+	            <prop key="/logout.do">logout</prop>
+			</props>
+		</property>
+	</bean>
+	<bean id="login" class="tommy.spring.web.user.LoginController"></bean>
+	<bean id="getBoardList" class="tommy.spring.web.board.GetBoardListController"></bean>
+	<bean id="getBoard" class="tommy.spring.web.board.GetBoardController"></bean>
+	<bean id="insertBoard" class="tommy.spring.web.board.InsertBoardController"></bean>
+	<bean id="updateBoard" class="tommy.spring.web.board.UpdateBoardController"></bean>
+	<bean id="deleteBoard" class="tommy.spring.web.board.DeleteBoardController"></bean>
+	<bean id="logout" class="tommy.spring.web.user.LogoutController"></bean>
+	 -->
+	 
+	<!-- ViewResovler 등록 -->
+	<!-- 
+	<bean id="viewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+	<property name="prefix" value="/WEB-INF/board/"></property>
+	<property name="suffix" value=".jsp"></property>
+	</bean>
+	 -->
+	 
+</beans>

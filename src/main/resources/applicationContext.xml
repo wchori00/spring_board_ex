@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.3.xsd
+		http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.3.xsd
+		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.3.xsd">
+
+	<context:component-scan base-package="tommy.spring.web"></context:component-scan>
+	<aop:aspectj-autoproxy></aop:aspectj-autoproxy>
+	
+	<bean id="sessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+		<property name="dataSource" ref="dataSource"/>
+		<property name="configLocation" value="classpath:mybatis-config.xml"/>
+	</bean>
+	
+	<bean id="sqlSessionTemplate" class="org.mybatis.spring.SqlSessionTemplate">
+		<constructor-arg ref="sessionFactory"/>
+	</bean>
+	
+	<!-- DataSource 등록 -->
+	<context:property-placeholder location="classpath:config/database.properties"/>
+	<bean id="dataSource" class="org.apache.commons.dbcp2.BasicDataSource" destroy-method="close">
+		<property name="driverClassName" value="${jdbc.driver}"/>
+		<property name="url" value="${jdbc.url}" />
+		<property name="username" value="${jdbc.username}" />
+		<property name="password" value="${jdbc.password}" />
+	</bean>
+	
+	<!-- 스프링 JDBC 설정 -->
+	<bean id="jdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate">
+		<property name="dataSource" ref="dataSource" />
+	</bean>
+	
+	<!-- 스프링과 JPA 연동 설정 -->
+	<bean id="jpaVendorAdapter" class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter">
+	</bean>
+	<bean id="entityManagerFactory" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
+		<property name="dataSource" ref="dataSource"></property>
+		<property name="jpaVendorAdapter" ref="jpaVendorAdapter"></property>
+		<property name="packagesToScan" value="tommy.spring.web.board"></property>
+		<property name="jpaProperties">
+			<props>
+				<prop key="hibernate.dialect">
+					org.hibernate.dialect.Oracle12cDialect
+				</prop>
+				<prop key="hibernate.show_sql">true</prop>
+				<prop key="hibernate.format_sql">true</prop>
+				<prop key="hibernate.use_sql_comments">true</prop>
+				<prop key="hibernate.id.new_generator_mappings">true</prop>
+				<prop key="hibernate.hbm2ddl.auto">create</prop>
+			</props>
+		</property>
+	</bean>
+
+	<!-- 스프링과 JPA 연동 설정 추가 -->
+	<bean id="txManager" class="org.springframework.orm.jpa.JpaTransactionManager">
+		<property name="entityManagerFactory" ref="entityManagerFactory"></property>
+	</bean>
+	
+		<!-- Transction 설정 -->
+<!-- 	<bean id="txManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager"> -->
+<!-- 		<property name="dataSource" ref="dataSource" /> -->
+<!-- 	</bean> -->
+<!-- 	<tx:advice id="txAdvice" transaction-manager="txManager"> -->
+<!-- 		<tx:attributes> -->
+<!-- 			<tx:method name="get*" read-only="true" /> -->
+<!-- 			<tx:method name="*" /> -->
+<!-- 		</tx:attributes> -->
+<!-- 	</tx:advice> -->
+	
+<!-- 	<aop:config> -->
+<!-- 		<aop:pointcut expression="execution(* tommy.spring.web..*Impl.*(..))" id="txPointcut"/> -->
+<!-- 		<aop:advisor advice-ref="txAdvice" pointcut-ref="txPointcut"/> -->
+<!-- 	</aop:config> -->
+
+
+<!-- 	<bean id="log" class="tommy.spring.web.common.Log4jAdvice"></bean> -->
+<!-- 	<bean id="before" class="tommy.spring.web.common.BeforeAdvice"></bean> -->
+<!-- 	<bean id="afterReturning" class="tommy.spring.web.common.AfterReturningAdvice"></bean> -->
+<!-- 	<bean id="afterThrowing" class="tommy.spring.web.common.AfterThrowingAdvice"></bean> -->
+<!-- 	<bean id="after" class="tommy.spring.web.common.AfterAdvice"></bean> -->
+<!-- 	<bean id="around" class="tommy.spring.web.common.AroundAdvice"></bean> -->
+	
+<!-- 	<aop:config> -->
+<!-- 		<aop:pointcut expression="execution(* tommy.spring.web..*Impl.*(..))" id="allPointcut"/> -->
+<!-- 		<aop:pointcut expression="execution(* tommy.spring.web..*Impl.get*(..))" id="getPointcut"/> -->
+
+<!-- 		<aop:aspect ref="afterThrowing"> -->
+<!-- 			<aop:after-throwing method="exceptionLog" pointcut-ref="allPointcut" throwing="e"/> -->
+<!-- 		</aop:aspect> -->
+<!-- 		<aop:aspect ref="after"> -->
+<!-- 			<aop:after method="finallyLog" pointcut-ref="allPointcut"/> -->
+<!-- 		</aop:aspect> -->
+<!-- 		<aop:aspect ref="afterReturning"> -->
+<!-- 			<aop:after-returning method="afterLog" pointcut-ref="getPointcut" returning="returnObj"/> -->
+<!-- 		</aop:aspect> -->
+<!-- 		<aop:aspect ref="before"> -->
+<!-- 			<aop:before method="beforeLog" pointcut-ref="getPointcut"/> -->
+<!-- 		</aop:aspect> -->
+<!-- 		<aop:aspect ref="around"> -->
+<!-- 			<aop:around method="aroundLog" pointcut-ref="getPointcut"/> -->
+<!-- 		</aop:aspect> -->
+<!-- 	</aop:config> -->
+<!--	<bean id="userService" class="tommy.spring.web.user.impl.UserServiceImpl">
+		<property name="userDAO" ref="userDAO"/>
+	</bean>
+	
+	<bean id="userDAO" class="tommy.spring.web.user.impl.UserDAO"></bean> -->
+
+<!--	<context:component-scan base-package="tommy.spring.polymorphism"></context:component-scan>
+	<bean id="sonny" class="tommy.spring.polymorphism.SonySpeaker"/> -->
+	<!-- @Component 어노테이션이 부여된 Class들은 자동으로 IOC Container에 Bean으로 동록이 된다 -->
+
+<!--	<bean id="myLifeBean" class="tommy.spring.lifecycle.MyLifeBeanImpl" init-method="init">
+		<property name="greeting"><value>Hello, </value></property>
+	</bean>
+
+	<bean class="tommy.spring.lifecycle.CustomBeanPostProcessor"/> -->
+
+<!--	<bean id="collectionBean" class="tommy.spring.collection.CollectionBean">
+		<property name="addressList"> -->
+<!--			<props>
+				<prop key="홍길동">율도국</prop>
+				<prop key="손오공">화과산</prop>
+			</props> -->
+
+<!--			<set value-type="java.lang.String">
+				<value>서울시 서초구 서초동</value>
+				<value>서울시 동대문구 장안동</value>
+				<value>서울시 동대문구 장안동</value>
+				<value>서울시 동대문구 장안동</value>
+			</set> -->
+		
+<!--			<map>
+				<entry>
+					<key><value>홍길동</value></key>
+					<value>율도국</value>
+				</entry>
+				<entry>
+					<key><value>손오공</value></key>
+					<value>화과산</value>
+				</entry>
+			</map> -->
+		
+<!--			<list>
+				<value>서울시 서초구 서초동</value>
+				<value>서울시 동대문구 장안동</value>
+			</list> -->
+<!--		</property>
+	</bean> -->
+
+<!-- 	<bean id="tv" class="tommy.spring.polymorphism.SamsungTV" p:speaker-ref="sony" p:price="280000"/> -->
+<!--		<constructor-arg ref="apple"></constructor-arg>
+ 		<constructor-arg value="3000000"></constructor-arg> -->
+<!--		<property name="speaker" ref="apple"/>
+		<property name="price" value="3000000"/>
+	</bean>-->
+
+<!-- 	<bean id="sony" class="tommy.spring.polymorphism.SonySpeaker"/> -->
+<!-- 	<bean id="apple" class="tommy.spring.polymorphism.AppleSpeaker"/> -->
+	<!-- init-method="start" destroy-method="stop"-->
+	<!-- scope="singleton"-->
+	<!-- scope="prototype"-->
+
+</beans>
